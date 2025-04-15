@@ -3,6 +3,7 @@ import db from './config/connection.js';
 import routes from './routes/index.js';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
+import {Request, Response} from 'express';
 import cors from 'cors';
 import typeDefs from './schemas/typeDefs.js';
 import resolvers from './schemas/resolvers.js';
@@ -19,24 +20,26 @@ interface Context {
 }
 const server = new ApolloServer<Context>({ typeDefs, resolvers });
 const app = express();
-const PORT = process.env.PORT || 3001;
 await server.start();
+const PORT = process.env.PORT || 3001;
+const start = async () => {
+await db;
+}
+start();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // if we're in production, serve client/build as static assets
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
+//if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, './client/dist')));
   app.get('*', (_, res) => {
-    res.sendFile(path.join(__dirname, '../client/build/index.html'));
+    res.sendFile(path.join(__dirname, './client/dist/index.html'));
   });
-}
+//}
 
 app.use(
   '/graphql',
-  cors(),
-  json(),
   expressMiddleware(server, {
     context: async ({ req }) => {
       const authHeader = req.headers.authorization || '';
@@ -57,12 +60,15 @@ app.use(
   })
 );
 
-app.use(routes);
+//app.use(routes);
 
 console.log('Starting server setup...');
 
-db.once('open', () => {
-  console.log('✅ Database connected successfully');
+//db.on('error', (err) => {
+ // console.error(`❌ Database connection error: ${err.message}`);
+//});
+
+console.log('✅ Database connected successfully');
   app.listen(PORT, (err?: Error) => {
     if (err) {
       console.error(`❌ Failed to start server: ${err.message}`);
@@ -70,8 +76,3 @@ db.once('open', () => {
       console.log(`🌍 Now listening on http://localhost:${PORT}`);
     }
   });
-});
-
-db.on('error', (err) => {
-  console.error(`❌ Database connection error: ${err.message}`);
-});
