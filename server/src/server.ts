@@ -1,19 +1,16 @@
 import express from 'express';
 import db from './config/connection.js';
-import routes from './routes/index.js';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
-import {Request, Response} from 'express';
-import cors from 'cors';
 import typeDefs from './schemas/typeDefs.js';
 import resolvers from './schemas/resolvers.js';
 import jwt from 'jsonwebtoken';
-import bodyParser from 'body-parser';
+//import bodyParser from 'body-parser';
 import path from 'path';
 
 const __dirname = path.resolve();
 
-const { json } = bodyParser;
+//const {json} = bodyParser;
 
 interface Context {
   token: { _id: string } | null;
